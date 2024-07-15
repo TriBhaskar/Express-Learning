@@ -150,23 +150,15 @@ app.put("/api/users/:id", resolveUserById, (req: Request, res: Response) => {
 });
 
 // All patch requests
-app.patch("/api/users/:id", (req: Request, res: Response) => {
+app.patch("/api/users/:id", resolveUserById, (req: Request, res: Response) => {
   const { body, userIndex } = req;
-  console.log(body);
-  if (isNaN(req.userIndex)) {
-    return res.status(400).send({ msg: "Invalid ID" });
-  }
   mockUsers[userIndex] = { ...mockUsers[userIndex], ...body };
   res.status(200).send(mockUsers[userIndex]);
 });
 
 // All delete requests
-app.delete("/api/users/:id", (req: Request, res: Response) => {
+app.delete("/api/users/:id", resolveUserById, (req: Request, res: Response) => {
   const userIndex = req.userIndex;
-  console.log(userIndex);
-  if (userIndex === -1) {
-    return res.status(404).send({ msg: "User not found" });
-  }
   mockUsers.splice(userIndex, 1);
   res.status(200).send({ msg: "User deleted successfully" });
 });
