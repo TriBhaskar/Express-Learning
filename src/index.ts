@@ -1,8 +1,5 @@
-import express, { NextFunction, Request, Response } from "express";
-
-interface CustomRequest extends Request {
-  userIndex: number;
-}
+import express, { NextFunction } from "express";
+import { Request, Response } from "express-serve-static-core";
 
 const app = express();
 app.use(express.json());
@@ -16,11 +13,7 @@ const loggingMiddleware = (req: Request, res: Response, next: NextFunction) => {
 };
 
 // middleware to validate user id
-const resolveUserById = (
-  req: CustomRequest,
-  res: Response,
-  next: NextFunction
-) => {
+const resolveUserById = (req: Request, res: Response, next: NextFunction) => {
   const {
     params: { id },
   } = req;
@@ -32,7 +25,6 @@ const resolveUserById = (
   if (userIndex === -1) {
     return res.status(404).send({ msg: "User not found" });
   }
-
   req.userIndex = userIndex;
   next();
 };
@@ -151,30 +143,18 @@ app.post("/api/users", (req: Request, res: Response) => {
 });
 
 // All put requests
-app.put(
-  "/api/users/:id",
-  resolveUserById,
-  (req: CustomRequest, res: Response) => {
-    const { body, userIndex } = req;
-    mockUsers[userIndex] = { id: mockUsers[userIndex], ...body };
-    res.status(200).send(mockUsers[userIndex]);
-  }
-);
+app.put("/api/users/:id", resolveUserById, (req: Request, res: Response) => {
+  const { body, userIndex } = req;
+  mockUsers[userIndex] = { id: mockUsers[userIndex].id, ...body };
+  res.status(200).send(mockUsers[userIndex]);
+});
 
 // All patch requests
 app.patch("/api/users/:id", (req: Request, res: Response) => {
-  const {
-    body,
-    params: { id },
-  } = req;
+  const { body, userIndex } = req;
   console.log(body);
-  const userId = parseInt(id);
-  if (isNaN(userId)) {
+  if (isNaN(req.userIndex)) {
     return res.status(400).send({ msg: "Invalid ID" });
-  }
-  const userIndex = mockUsers.findIndex((user) => user.id === userId);
-  if (userIndex === -1) {
-    return res.status(404).send({ msg: "User not found" });
   }
   mockUsers[userIndex] = { ...mockUsers[userIndex], ...body };
   res.status(200).send(mockUsers[userIndex]);
@@ -182,15 +162,8 @@ app.patch("/api/users/:id", (req: Request, res: Response) => {
 
 // All delete requests
 app.delete("/api/users/:id", (req: Request, res: Response) => {
-  const {
-    params: { id },
-  } = req;
-  console.log(id);
-  const userId = parseInt(id);
-  if (isNaN(userId)) {
-    return res.status(400).send({ msg: "Invalid ID" });
-  }
-  const userIndex = mockUsers.findIndex((user) => user.id === userId);
+  const userIndex = req.userIndex;
+  console.log(userIndex);
   if (userIndex === -1) {
     return res.status(404).send({ msg: "User not found" });
   }
