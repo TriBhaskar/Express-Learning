@@ -1,5 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
-import { query } from "express-validator";
+import { query, validationResult, body } from "express-validator";
 
 const app = express();
 app.use(express.json());
@@ -101,9 +101,15 @@ app.get(
 
 app.get(
   "/api/users",
-  query("filter").isString().notEmpty(),
+  query("filter")
+    .isString()
+    .notEmpty()
+    .withMessage(" Must not be Empty ")
+    .isLength({ min: 3, max: 10 })
+    .withMessage("Filter should be a string with length between 3 and 10"),
   (req: Request, res: Response) => {
-    console.log(req.query);
+    const result = validationResult(req);
+    console.log(result);
     const {
       query: { filter, value },
     } = req;
@@ -135,12 +141,30 @@ app.get("/api/products", (req: Request, res: Response) => {
 });
 
 // All post requests
-app.post("/api/users", (req: Request, res: Response) => {
-  console.log(req.body);
-  const newUser = { id: mockUsers[mockUsers.length - 1].id + 1, ...req.body };
-  mockUsers.push(newUser);
-  res.status(201).send(newUser);
-});
+app.post(
+  "/api/users",
+  [
+    body("name")
+      .notEmpty()
+      .withMessage("Username cannot be empty")
+      .isLength({ min: 3, max: 32 })
+      .withMessage("Username must be length between 3 and 32")
+      .isString()
+      .withMessage("Username must be a string"),
+  ],
+  (req: Request, res: Response) => {
+    const result = validationResult(req);
+    console.log(result);
+
+    if (!result.isEmpty()) {
+      return res.status(400).send({ erros: result.array() });
+    }
+    console.log(req.body);
+    const newUser = { id: mockUsers[mockUsers.length - 1].id + 1, ...req.body };
+    mockUsers.push(newUser);
+    res.status(201).send(newUser);
+  }
+);
 
 // All put requests
 app.put("/api/users/:id", resolveUserById, (req: Request, res: Response) => {
