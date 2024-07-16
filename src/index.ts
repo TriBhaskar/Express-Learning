@@ -1,5 +1,5 @@
-import express, { NextFunction } from "express";
-import { Request, Response } from "express-serve-static-core";
+import express, { NextFunction, Request, Response } from "express";
+import { query } from "express-validator";
 
 const app = express();
 app.use(express.json());
@@ -99,31 +99,31 @@ app.get(
   }
 );
 
-app.get("/api/users", (req: Request, res: Response) => {
-  console.log(req.query);
-  const {
-    query: { filter, value },
-  } = req;
-  if (filter && value) {
-    return res.send(
-      mockUsers.filter((user) => user.name.includes(value.toString()))
-    );
+app.get(
+  "/api/users",
+  query("filter").isString().notEmpty(),
+  (req: Request, res: Response) => {
+    console.log(req.query);
+    const {
+      query: { filter, value },
+    } = req;
+    if (filter && value) {
+      return res.send(
+        mockUsers.filter((user) => user.name.includes(value.toString()))
+      );
+    }
+    return res.send(mockUsers);
   }
-  return res.send(mockUsers);
-});
+);
 
 app.use(loggingMiddleware, (req, res, next) => {
   console.log("Finished logging");
   next();
 });
 
-app.get("/api/users/:id", (req: Request, res: Response) => {
-  console.log(req.params);
-  const id = parseInt(req.params.id);
-  if (isNaN(id)) {
-    return res.status(400).send({ msg: "Invalid ID" });
-  }
-  const user = mockUsers.find((user) => user.id === id);
+app.get("/api/users/:id", resolveUserById, (req: Request, res: Response) => {
+  const { userIndex } = req;
+  const user = mockUsers[userIndex];
   if (!user) {
     return res.status(404).send({ msg: "User not found" });
   }
