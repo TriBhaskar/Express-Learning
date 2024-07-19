@@ -1,5 +1,12 @@
 import express, { NextFunction, Request, Response } from "express";
-import { query, validationResult, body } from "express-validator";
+import {
+  query,
+  validationResult,
+  body,
+  matchedData,
+  checkSchema,
+} from "express-validator";
+import { creatUserValidationSchema } from "./utils/validationSchemas";
 
 const app = express();
 app.use(express.json());
@@ -143,24 +150,20 @@ app.get("/api/products", (req: Request, res: Response) => {
 // All post requests
 app.post(
   "/api/users",
-  [
-    body("name")
-      .notEmpty()
-      .withMessage("Username cannot be empty")
-      .isLength({ min: 3, max: 32 })
-      .withMessage("Username must be length between 3 and 32")
-      .isString()
-      .withMessage("Username must be a string"),
-  ],
+  checkSchema(creatUserValidationSchema),
   (req: Request, res: Response) => {
     const result = validationResult(req);
-    console.log(result);
-
     if (!result.isEmpty()) {
       return res.status(400).send({ erros: result.array() });
     }
-    console.log(req.body);
-    const newUser = { id: mockUsers[mockUsers.length - 1].id + 1, ...req.body };
+    const data = matchedData(req);
+    console.log(data);
+    // console.log(req.body);
+    const newUser = {
+      id: mockUsers[mockUsers.length - 1].id + 1,
+      name: data.name,
+      marks: data.marks,
+    };
     mockUsers.push(newUser);
     res.status(201).send(newUser);
   }
