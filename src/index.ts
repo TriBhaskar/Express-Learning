@@ -7,9 +7,12 @@ import {
   checkSchema,
 } from "express-validator";
 import { creatUserValidationSchema } from "./utils/validationSchemas";
+import usersRouter from "./routes/users";
+import { mockUsers } from "./utils/constants";
 
 const app = express();
 app.use(express.json());
+app.use(usersRouter);
 
 // middleware
 
@@ -37,44 +40,6 @@ const resolveUserById = (req: Request, res: Response, next: NextFunction) => {
 };
 
 const port = process.env.PORT || 3000;
-
-const mockUsers = [
-  {
-    id: 1,
-    name: "Bhaskar Panthri",
-    marks: 90,
-  },
-  {
-    id: 2,
-    name: "Rohit Panthri",
-    marks: 80,
-  },
-  {
-    id: 3,
-    name: "Rahul Panthri",
-    marks: 85,
-  },
-  {
-    id: 4,
-    name: "Rajesh Panthri",
-    marks: 82,
-  },
-  {
-    id: 5,
-    name: "Ramesh Panthri",
-    marks: 78,
-  },
-  {
-    id: 6,
-    name: "Rakesh Panthri",
-    marks: 91,
-  },
-  {
-    id: 7,
-    name: "Raj Panthri",
-    marks: 89,
-  },
-];
 
 const mockProducts = [
   {
@@ -106,28 +71,23 @@ app.get(
   }
 );
 
-app.get(
-  "/api/users",
-  query("filter")
-    .isString()
-    .notEmpty()
-    .withMessage(" Must not be Empty ")
-    .isLength({ min: 3, max: 10 })
-    .withMessage("Filter should be a string with length between 3 and 10"),
-  (req: Request, res: Response) => {
-    const result = validationResult(req);
-    console.log(result);
-    const {
-      query: { filter, value },
-    } = req;
-    if (filter && value) {
-      return res.send(
-        mockUsers.filter((user) => user.name.includes(value.toString()))
-      );
-    }
-    return res.send(mockUsers);
-  }
-);
+// app.get(
+//   "/api/users",
+//   checkSchema(creatUserValidationSchema),
+//   (req: Request, res: Response) => {
+//     const result = validationResult(req);
+//     console.log(result);
+//     const {
+//       query: { filter, value },
+//     } = req;
+//     if (filter && value) {
+//       return res.send(
+//         mockUsers.filter((user) => user.name.includes(value.toString()))
+//       );
+//     }
+//     return res.send(mockUsers);
+//   }
+// );
 
 app.use(loggingMiddleware, (req, res, next) => {
   console.log("Finished logging");
