@@ -20,10 +20,6 @@ router.get("/api/users/:id", resolveUserById, (req: Request, res: Response) => {
   res.send(user);
 });
 
-router.get("/api/products", (req: Request, res: Response) => {
-  res.send(mockProducts);
-});
-
 router.get(
   "/api/users",
   query("filter")
