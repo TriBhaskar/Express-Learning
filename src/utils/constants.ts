@@ -35,3 +35,16 @@ export const mockUsers = [
     marks: 89,
   },
 ];
+
+export const mockProducts = [
+  {
+    id: 1,
+    name: "Shirt",
+    price: 500,
+  },
+  {
+    id: 2,
+    name: "Pant",
+    price: 1000,
+  },
+];

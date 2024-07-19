@@ -1,42 +1,43 @@
 import { Router, Request, Response } from "express";
-import { checkSchema, matchedData, validationResult } from "express-validator";
+import {
+  checkSchema,
+  matchedData,
+  validationResult,
+  query,
+} from "express-validator";
 import { creatUserValidationSchema } from "../utils/validationSchemas";
-import { mockUsers } from "../utils/constants";
+import { mockProducts, mockUsers } from "../utils/constants";
+import { resolveUserById } from "../utils/middlewares";
 
 const router = Router();
 
+router.get("/api/users/:id", resolveUserById, (req: Request, res: Response) => {
+  const { userIndex } = req;
+  const user = mockUsers[userIndex];
+  if (!user) {
+    return res.status(404).send({ msg: "User not found" });
+  }
+  res.send(user);
+});
+
+router.get("/api/products", (req: Request, res: Response) => {
+  res.send(mockProducts);
+});
+
 router.get(
   "/api/users",
-  checkSchema({
-    filter: {
-      in: ["query"],
-      isString: {
-        errorMessage: "Filter must be a string",
-      },
-      notEmpty: {
-        errorMessage: "Filter cannot be empty",
-      },
-      isLength: {
-        options: {
-          min: 3,
-          max: 10,
-        },
-        errorMessage: "Filter should be a string with length between 3 and 10",
-      },
-    },
-    value: {
-      in: ["query"],
-      isString: {
-        errorMessage: "Value must be a string",
-      },
-      notEmpty: {
-        errorMessage: "Value cannot be empty",
-      },
-    },
-  }),
+  query("filter")
+    .isString()
+    .withMessage("Filter must be a string")
+    .notEmpty()
+    .withMessage("Filter cannot be empty")
+    .isLength({ min: 3, max: 10 })
+    .withMessage("Filter must be between 3 and 10 characters"),
   (req: Request, res: Response) => {
     const result = validationResult(req);
-    console.log(result);
+    if (!result.isEmpty()) {
+      return res.status(400).send({ erros: result.array() });
+    }
     const {
       query: { filter, value },
     } = req;
@@ -54,7 +55,6 @@ router.post(
   checkSchema(creatUserValidationSchema),
   (req: Request, res: Response) => {
     const result = validationResult(req);
-    result.mapped();
     if (!result.isEmpty()) {
       return res.status(400).send({ erros: result.array() });
     }
@@ -68,6 +68,34 @@ router.post(
     };
     mockUsers.push(newUser);
     res.status(201).send(newUser);
+  }
+);
+// All put requests
+router.put("/api/users/:id", resolveUserById, (req: Request, res: Response) => {
+  const { body, userIndex } = req;
+  mockUsers[userIndex] = { id: mockUsers[userIndex].id, ...body };
+  res.status(200).send(mockUsers[userIndex]);
+});
+
+// All patch requests
+router.patch(
+  "/api/users/:id",
+  resolveUserById,
+  (req: Request, res: Response) => {
+    const { body, userIndex } = req;
+    mockUsers[userIndex] = { ...mockUsers[userIndex], ...body };
+    res.status(200).send(mockUsers[userIndex]);
+  }
+);
+
+// All delete requests
+router.delete(
+  "/api/users/:id",
+  resolveUserById,
+  (req: Request, res: Response) => {
+    const userIndex = req.userIndex;
+    mockUsers.splice(userIndex, 1);
+    res.status(200).send({ msg: "User deleted successfully" });
   }
 );
 
