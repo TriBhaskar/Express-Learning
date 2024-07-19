@@ -108,26 +108,26 @@ app.get("/api/products", (req: Request, res: Response) => {
 });
 
 // All post requests
-app.post(
-  "/api/users",
-  checkSchema(creatUserValidationSchema),
-  (req: Request, res: Response) => {
-    const result = validationResult(req);
-    if (!result.isEmpty()) {
-      return res.status(400).send({ erros: result.array() });
-    }
-    const data = matchedData(req);
-    console.log(data);
-    // console.log(req.body);
-    const newUser = {
-      id: mockUsers[mockUsers.length - 1].id + 1,
-      name: data.name,
-      marks: data.marks,
-    };
-    mockUsers.push(newUser);
-    res.status(201).send(newUser);
-  }
-);
+// app.post(
+//   "/api/users",
+//   checkSchema(creatUserValidationSchema),
+//   (req: Request, res: Response) => {
+//     const result = validationResult(req);
+//     if (!result.isEmpty()) {
+//       return res.status(400).send({ erros: result.array() });
+//     }
+//     const data = matchedData(req);
+//     console.log(data);
+//     // console.log(req.body);
+//     const newUser = {
+//       id: mockUsers[mockUsers.length - 1].id + 1,
+//       name: data.name,
+//       marks: data.marks,
+//     };
+//     mockUsers.push(newUser);
+//     res.status(201).send(newUser);
+//   }
+// );
 
 // All put requests
 app.put("/api/users/:id", resolveUserById, (req: Request, res: Response) => {

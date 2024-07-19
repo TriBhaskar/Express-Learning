@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { checkSchema, validationResult } from "express-validator";
+import { checkSchema, matchedData, validationResult } from "express-validator";
 import { creatUserValidationSchema } from "../utils/validationSchemas";
 import { mockUsers } from "../utils/constants";
 
@@ -7,7 +7,33 @@ const router = Router();
 
 router.get(
   "/api/users",
-  checkSchema(creatUserValidationSchema),
+  checkSchema({
+    filter: {
+      in: ["query"],
+      isString: {
+        errorMessage: "Filter must be a string",
+      },
+      notEmpty: {
+        errorMessage: "Filter cannot be empty",
+      },
+      isLength: {
+        options: {
+          min: 3,
+          max: 10,
+        },
+        errorMessage: "Filter should be a string with length between 3 and 10",
+      },
+    },
+    value: {
+      in: ["query"],
+      isString: {
+        errorMessage: "Value must be a string",
+      },
+      notEmpty: {
+        errorMessage: "Value cannot be empty",
+      },
+    },
+  }),
   (req: Request, res: Response) => {
     const result = validationResult(req);
     console.log(result);
@@ -20,6 +46,28 @@ router.get(
       );
     }
     return res.send(mockUsers);
+  }
+);
+
+router.post(
+  "/api/users",
+  checkSchema(creatUserValidationSchema),
+  (req: Request, res: Response) => {
+    const result = validationResult(req);
+    result.mapped();
+    if (!result.isEmpty()) {
+      return res.status(400).send({ erros: result.array() });
+    }
+    const data = matchedData(req);
+    console.log(data);
+    // console.log(req.body);
+    const newUser = {
+      id: mockUsers[mockUsers.length - 1].id + 1,
+      name: data.name,
+      marks: data.marks,
+    };
+    mockUsers.push(newUser);
+    res.status(201).send(newUser);
   }
 );
 
