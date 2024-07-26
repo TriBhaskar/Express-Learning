@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from "express";
 import router from "./routes/index";
 import cookieParser from "cookie-parser";
+import session from "express-session";
 
 const app = express();
 app.use(express.json());
