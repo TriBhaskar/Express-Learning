@@ -32,6 +32,7 @@ const port = process.env.PORT || 3000;
 app.get("/", (req, res) => {
   console.log(req.session);
   console.log(req.sessionID);
+  req.session.visited = true;
   res.cookie("hello", "world", { maxAge: 30000, signed: true });
   res.status(201).send({ msg: "Hello World!" });
 });
