@@ -6,6 +6,16 @@ import session from "express-session";
 const app = express();
 app.use(express.json());
 app.use(cookieParser("HelloWorld"));
+app.use(
+  session({
+    secret: "bhaskar the great",
+    saveUninitialized: false,
+    resave: false,
+    cookie: {
+      maxAge: 60000 * 60,
+    },
+  })
+);
 app.use(router);
 
 // middleware
@@ -20,6 +30,8 @@ const port = process.env.PORT || 3000;
 
 // All get requests
 app.get("/", (req, res) => {
+  console.log(req.session);
+  console.log(req.sessionID);
   res.cookie("hello", "world", { maxAge: 30000, signed: true });
   res.status(201).send({ msg: "Hello World!" });
 });
