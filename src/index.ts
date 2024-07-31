@@ -2,7 +2,7 @@ import express, { NextFunction, Request, Response } from "express";
 import router from "./routes/index";
 import cookieParser from "cookie-parser";
 import session from "express-session";
-import { mockUsers } from "./utils/constants";
+import { mockProducts, mockUsers } from "./utils/constants";
 
 const app = express();
 app.use(express.json());
@@ -58,6 +58,27 @@ app.get("/api/auth/status", (req, res) => {
     return res.status(200).send({ msg: "Logged in", user: req.session.user });
   }
   return res.status(401).send({ msg: "Not logged in" });
+});
+
+app.post("/api/cart", (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).send({ msg: "Not logged in" });
+  }
+  const { productId, productName } = req.body;
+  const product = mockProducts.find((product) => product.id === productId);
+  if (!product) {
+    return res.status(404).send({ msg: "Product not found" });
+  }
+  req.session.cart = req.session.cart || [];
+  req.session.cart.push(product);
+  res.status(200).send({ msg: "Product added to cart" });
+});
+
+app.get("/api/cart", (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).send({ msg: "Not logged in" });
+  }
+  res.status(200).send({ cart: req.session.cart });
 });
 
 app.listen(port, () => {

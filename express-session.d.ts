@@ -10,5 +10,10 @@ declare module "express-session" {
       username: string;
       password: string;
     };
+    cart: {
+      id: number;
+      name: string;
+      price: number;
+    }[];
   }
 }
