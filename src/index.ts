@@ -44,6 +44,20 @@ app.post("/api/auth", (req, res) => {
   if (!findUser || findUser.password !== password) {
     return res.status(401).send({ msg: "Bad Credentials" });
   }
+  req.session.user = findUser;
+  return res
+    .status(200)
+    .send({ msg: "Logged in successfully", user: findUser });
+});
+
+app.get("/api/auth/status", (req, res) => {
+  req.sessionStore.get(req.sessionID, (err, session) => {
+    console.log(session);
+  });
+  if (req.session.user) {
+    return res.status(200).send({ msg: "Logged in", user: req.session.user });
+  }
+  return res.status(401).send({ msg: "Not logged in" });
 });
 
 app.listen(port, () => {
