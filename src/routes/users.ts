@@ -61,6 +61,8 @@ router.post(
       id: mockUsers[mockUsers.length - 1].id + 1,
       name: data.name,
       marks: data.marks,
+      username: "", // Provide a value for the username property
+      password: "", // Provide a value for the password property
     };
     mockUsers.push(newUser);
     res.status(201).send(newUser);

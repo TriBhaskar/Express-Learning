@@ -2,6 +2,7 @@ import express, { NextFunction, Request, Response } from "express";
 import router from "./routes/index";
 import cookieParser from "cookie-parser";
 import session from "express-session";
+import { mockUsers } from "./utils/constants";
 
 const app = express();
 app.use(express.json());
@@ -35,6 +36,14 @@ app.get("/", (req, res) => {
   req.session.visited = true;
   res.cookie("hello", "world", { maxAge: 30000, signed: true });
   res.status(201).send({ msg: "Hello World!" });
+});
+
+app.post("/api/auth", (req, res) => {
+  const { username, password } = req.body;
+  const findUser = mockUsers.find((user) => user.username === username);
+  if (!findUser || findUser.password !== password) {
+    return res.status(401).send({ msg: "Bad Credentials" });
+  }
 });
 
 app.listen(port, () => {
