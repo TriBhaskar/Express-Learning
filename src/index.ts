@@ -3,6 +3,7 @@ import router from "./routes/index";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import { mockProducts, mockUsers } from "./utils/constants";
+import passport from "passport";
 
 const app = express();
 app.use(express.json());
@@ -17,6 +18,8 @@ app.use(
     },
   })
 );
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(router);
 
 // middleware
