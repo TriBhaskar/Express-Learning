@@ -9,8 +9,12 @@ passport.use(
       if (!findUser) {
         throw new Error("User not found");
       }
+      if (findUser.password !== password) {
+        throw new Error("Invalid password");
+      }
+      done(null, findUser);
     } catch (error) {
-      return done(error);
+      done(error, false);
     }
   })
 );
