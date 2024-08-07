@@ -5,14 +5,14 @@ import { mockUsers } from "../utils/constants";
 passport.serializeUser((user: any, done) => {
   console.log("Serializing user");
   console.log(user);
-  done(null, user.username);
+  done(null, user.id);
 });
 
-passport.deserializeUser((username: string, done) => {
+passport.deserializeUser((id: number, done) => {
   console.log("Deserializing user");
-  console.log(`id: ${username}`);
+  console.log(`id: ${id}`);
   try {
-    const findUser = mockUsers.find((user) => user.username === username);
+    const findUser = mockUsers.find((user) => user.id === id);
     if (!findUser) return done(new Error("User not found"));
     done(null, findUser);
   } catch (error) {
