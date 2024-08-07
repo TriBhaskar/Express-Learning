@@ -58,6 +58,20 @@ app.get("/api/auth/status", (req, res) => {
   }
   return res.status(401).send({ msg: "Not logged in" });
 });
+
+app.post("/api/auth/logout", (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).send({ msg: "Not logged in" });
+  }
+
+  req.logout((err) => {
+    if (err) {
+      return res.status(500).send({ msg: "Error logging out" });
+    }
+    res.status(200).send({ msg: "Logged out successfully" });
+  });
+});
+
 // app.post("/api/auth", (req, res) => {
 //   const { username, password } = req.body;
 //   const findUser = mockUsers.find((user) => user.username === username);
