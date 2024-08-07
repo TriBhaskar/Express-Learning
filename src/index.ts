@@ -48,6 +48,16 @@ app.post("/api/auth", passport.authenticate("local"), (req, res) => {
   res.status(200).send({ msg: "Logged in successfully", user: req.user });
 });
 
+app.get("/api/auth/status", (req, res) => {
+  console.log(`Inside /api/auth/status`);
+  console.log(req.user);
+  console.log(req.session);
+
+  if (req.isAuthenticated()) {
+    return res.status(200).send({ msg: "Logged in", user: req.user });
+  }
+  return res.status(401).send({ msg: "Not logged in" });
+});
 // app.post("/api/auth", (req, res) => {
 //   const { username, password } = req.body;
 //   const findUser = mockUsers.find((user) => user.username === username);
