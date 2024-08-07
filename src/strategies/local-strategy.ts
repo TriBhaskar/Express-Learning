@@ -2,8 +2,26 @@ import passport from "passport";
 import { Strategy } from "passport-local";
 import { mockUsers } from "../utils/constants";
 
-passport.use(
+passport.serializeUser((user: any, done) => {
+  console.log("Serializing user");
+  console.log(user);
+  done(null, user.id);
+});
+
+passport.deserializeUser((id: number, done) => {
+  try {
+    const findUser = mockUsers.find((user) => user.id === id);
+    if (!findUser) return done(new Error("User not found"));
+    done(null, findUser);
+  } catch (error) {
+    done(error, null);
+  }
+});
+
+export default passport.use(
   new Strategy((username, password, done) => {
+    console.log(`Username: ${username}, Password: ${password}`);
+
     try {
       const findUser = mockUsers.find((user) => user.username === username);
       if (!findUser) {

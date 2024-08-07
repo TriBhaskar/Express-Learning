@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import { mockProducts, mockUsers } from "./utils/constants";
 import passport from "passport";
+import "./strategies/local-strategy";
 
 const app = express();
 app.use(express.json());
@@ -41,27 +42,33 @@ app.get("/", (req, res) => {
   res.status(201).send({ msg: "Hello World!" });
 });
 
-app.post("/api/auth", (req, res) => {
-  const { username, password } = req.body;
-  const findUser = mockUsers.find((user) => user.username === username);
-  if (!findUser || findUser.password !== password) {
-    return res.status(401).send({ msg: "Bad Credentials" });
-  }
-  req.session.user = findUser;
-  return res
-    .status(200)
-    .send({ msg: "Logged in successfully", user: findUser });
+//using passportjs
+
+app.post("/api/auth", passport.authenticate("local"), (req, res) => {
+  res.status(200).send({ msg: "Logged in successfully", user: req.user });
 });
 
-app.get("/api/auth/status", (req, res) => {
-  req.sessionStore.get(req.sessionID, (err, session) => {
-    console.log(session);
-  });
-  if (req.session.user) {
-    return res.status(200).send({ msg: "Logged in", user: req.session.user });
-  }
-  return res.status(401).send({ msg: "Not logged in" });
-});
+// app.post("/api/auth", (req, res) => {
+//   const { username, password } = req.body;
+//   const findUser = mockUsers.find((user) => user.username === username);
+//   if (!findUser || findUser.password !== password) {
+//     return res.status(401).send({ msg: "Bad Credentials" });
+//   }
+//   req.session.user = findUser;
+//   return res
+//     .status(200)
+//     .send({ msg: "Logged in successfully", user: findUser });
+// });
+
+// app.get("/api/auth/status", (req, res) => {
+//   req.sessionStore.get(req.sessionID, (err, session) => {
+//     console.log(session);
+//   });
+//   if (req.session.user) {
+//     return res.status(200).send({ msg: "Logged in", user: req.session.user });
+//   }
+//   return res.status(401).send({ msg: "Not logged in" });
+// });
 
 app.post("/api/cart", (req, res) => {
   if (!req.session.user) {
